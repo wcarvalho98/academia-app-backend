@@ -14,6 +14,11 @@ const FeedbackSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Aluno',
     required: true
+  },
+  instrutor: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Instrutor',
+    required: true
   }
 });
 

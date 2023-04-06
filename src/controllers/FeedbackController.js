@@ -10,9 +10,10 @@ const feedbackSchema = Joi.object({
   avaliacao: Joi.number().min(1).max(5).required(),
   comentario: Joi.string().min(1).required(),
   aluno: Joi.string().hex().length(24).required(),
+  instrutor: Joi.string().hex().length(24).required(),
 });
 
-router.post('/:id', jwt, async (req, res) => {
+router.post('/', jwt, async (req, res) => {
   const { error } = feedbackSchema.validate(req.body);
   if (error) {
     return res.status(400).send(error.details[0].message);
@@ -25,12 +26,12 @@ router.post('/:id', jwt, async (req, res) => {
   session.startTransaction();
 
   try {
-    const { aluno: alunoId } = req.body;
+    const { aluno: alunoId, instrutor: instrutorId } = req.body;
     const authAluno = await Aluno.findById(req.auth.id);
     if (authAluno._id.toString() !== alunoId) {
       throw Error('Ação não permitida para este usuário');
     }
-    const instrutor = await Instrutor.findById(req.params.id);
+    const instrutor = await Instrutor.findById(instrutorId);
     if (!instrutor) {
       throw Error('Instrutor do feedback não encontrado');
     }
@@ -100,6 +101,40 @@ router.patch('/:id', jwt, async (req, res) => {
     await session.abortTransaction();
     console.error(err);
     res.status(500).send({ message: 'Ocorreu algum erro ao atualizar o feedback' });
+  } finally {
+    session.endSession();
+  }
+});
+
+router.delete('/:id', jwt, async (req, res) => {
+  const session = await startSession();
+  session.startTransaction();
+
+  try {
+    const aluno = await Aluno.findById(req.auth.id);
+    if (!aluno) {
+      throw Error('Ação proibida para instrutores');
+    }
+    const feedback = await Feedback.findById(req.params.id);
+    if (!feedback) {
+      throw Error('Feedback não encontrado');
+    }
+    if (feedback.aluno._id.toString() !== aluno._id.toString()) {
+      throw Error('Ação proibida para este usuário');
+    }
+
+    const { error } = await Instrutor.findByIdAndUpdate(feedback.instrutor, { $pull: { 'feedbacks': req.params.id } });
+    if (error) {
+      throw error;
+    }
+    await Feedback.findByIdAndDelete(req.params.id);
+
+    await session.commitTransaction();
+    res.status(200).send({ feedback });
+  } catch (error) {
+    await session.abortTransaction();
+    console.error(error);
+    res.status(500).send({ message: 'Ocorreu algum erro ao deletar o feedback' });
   } finally {
     session.endSession();
   }
