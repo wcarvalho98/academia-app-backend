@@ -119,6 +119,9 @@ router.delete('/:id/delete', jwt, async (req, res) => {
   session.startTransaction();
 
   try {
+    if (!(await Instrutor.findById(req.auth.id))) {
+      return res.status(403).send({ message: 'Ação não permitida' });
+    }
     const treino = await Treino.findByIdAndDelete(treinoId);
     if (!treino) {
       res.status(400).send({ message: 'Erro ao encontrar o treino' });

@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 
-const uri = "mongodb+srv://wcarvalho98:mongodbPassword@clustertest.h0t5lsh.mongodb.net/?retryWrites=true&w=majority";
+const MONGO_URI = 'mongodb://mongodb:27017';
 
-mongoose.connect(uri, { dbName: 'academia-app' })
+mongoose.connect(MONGO_URI, { dbName: 'academia-app' })
   .then(() => console.log('MongoDB connected.'))
   .catch(error => console.log('MongoDB connection error.', error));
 
