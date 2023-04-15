@@ -33,3 +33,5 @@ As seguintes rotas estão disponíveis:
 - POST `/feedback` - criar um feedback do aluno para instrutor (requer Bearer `token` de um aluno e esse aluno só pode mandar feedback apenas para o instrutor atual)
 - PATCH `/feedback/:id_feedback` - atualizar um feedback (requer Bearer `token` do aluno que fez o feedback)
 - DELETE `/feedback/:id_feedback` - deletar um feedback (requer Bearer `token` do aluno que fez o feedback)
+
+No arquivo `Insomnia.json`, na raiz do projeto, podes importar todas as rotas na aplicação Insomnia e facilmente fazer requests para as rotas.
